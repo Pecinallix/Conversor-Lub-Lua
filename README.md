@@ -16,12 +16,12 @@ Uma ferramenta web moderna e intuitiva para converter arquivos Lua entre bytecod
 
 ## 🚀 Demo ao Vivo
 
-[Ver Demo](https://seu-projeto.vercel.app)
+[Ver Demo](https://conversorlublua.vercel.app/)
 
 ## 📸 Screenshots
 
 <div align="center">
-  <img src="https://via.placeholder.com/800x500/1a1a2e/00d4ff?text=Conversor+LUB+LUA" alt="Screenshot do Conversor" />
+  <img width="1892" height="846" alt="image" src="https://github.com/user-attachments/assets/a8dc6604-53fa-480e-92cb-9f8af700394b" />
 </div>
 
 ## 🛠️ Tecnologias
