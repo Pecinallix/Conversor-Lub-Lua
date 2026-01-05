@@ -36,7 +36,7 @@ Uma ferramenta web moderna e intuitiva para converter arquivos Lua entre bytecod
 
 ### Online
 
-Acesse [https://seu-projeto.vercel.app](https://seu-projeto.vercel.app) e comece a usar imediatamente!
+Acesse [Conversor Online]([https://seu-projeto.vercel.app](https://conversorlublua.vercel.app/)) e comece a usar imediatamente!
 
 ### Localmente
 
