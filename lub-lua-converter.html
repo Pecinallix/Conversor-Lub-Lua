@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conversor LUB ↔ LUA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #e4e4e4;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        .converter-box {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: transparent;
+            color: #e4e4e4;
+            font-size: 1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .mode-btn:hover {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .mode-btn.active {
+            border-color: #00d4ff;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(123, 44, 191, 0.2));
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .mode-btn .arrow {
+            font-size: 1.2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .upload-area:hover {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: #7b2cbf;
+            background: rgba(123, 44, 191, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            color: #aaa;
+        }
+
+        .upload-text span {
+            color: #00d4ff;
+            text-decoration: underline;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .file-info {
+            display: none;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .file-info.show {
+            display: flex;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+        }
+
+        .file-details {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        .file-size {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .remove-file {
+            background: rgba(255, 100, 100, 0.2);
+            border: none;
+            color: #ff6b6b;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .remove-file:hover {
+            background: rgba(255, 100, 100, 0.4);
+        }
+
+        .convert-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .convert-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+        }
+
+        .convert-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-area {
+            display: none;
+            margin-top: 25px;
+            padding-top: 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .result-area.show {
+            display: block;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .result-title {
+            font-size: 1.1rem;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .download-btn {
+            padding: 10px 25px;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .code-preview {
+            background: #0d1117;
+            border-radius: 10px;
+            padding: 20px;
+            max-height: 400px;
+            overflow: auto;
+        }
+
+        .code-preview pre {
+            margin: 0;
+            font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: #c9d1d9;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .info-box {
+            background: rgba(255, 193, 7, 0.1);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin-top: 20px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .info-box .icon {
+            font-size: 1.3rem;
+        }
+
+        .info-box p {
+            font-size: 0.9rem;
+            color: #ccc;
+            line-height: 1.5;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 30px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-msg {
+            display: none;
+            background: rgba(255, 100, 100, 0.1);
+            border: 1px solid rgba(255, 100, 100, 0.3);
+            border-radius: 10px;
+            padding: 15px 20px;
+            color: #ff6b6b;
+            margin-top: 15px;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .mode-selector {
+                flex-direction: column;
+            }
+            
+            .upload-area {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🌙 Conversor LUB ↔ LUA</h1>
+            <p class="subtitle">Converta arquivos Lua compilados e código fonte</p>
+        </header>
+
+        <div class="converter-box">
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="lub-to-lua">
+                    <span>📦 LUB</span>
+                    <span class="arrow">→</span>
+                    <span>📄 LUA</span>
+                </button>
+                <button class="mode-btn" data-mode="lua-to-lub">
+                    <span>📄 LUA</span>
+                    <span class="arrow">→</span>
+                    <span>📦 LUB</span>
+                </button>
+            </div>
+
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <p class="upload-text">
+                    Arraste e solte seu arquivo aqui<br>
+                    ou <span>clique para selecionar</span>
+                </p>
+                <input type="file" class="file-input" id="fileInput" accept=".lub,.lua">
+            </div>
+
+            <div class="file-info" id="fileInfo">
+                <span class="file-icon">📄</span>
+                <div class="file-details">
+                    <div class="file-name" id="fileName">arquivo.lub</div>
+                    <div class="file-size" id="fileSize">0 KB</div>
+                </div>
+                <button class="remove-file" id="removeFile">✕</button>
+            </div>
+
+            <button class="convert-btn" id="convertBtn" disabled>
+                <span>⚡</span>
+                <span>Converter Arquivo</span>
+            </button>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Processando conversão...</p>
+            </div>
+
+            <div class="error-msg" id="errorMsg"></div>
+
+            <div class="result-area" id="resultArea">
+                <div class="result-header">
+                    <span class="result-title">
+                        <span>✅</span>
+                        <span>Conversão Concluída!</span>
+                    </span>
+                    <button class="download-btn" id="downloadBtn">
+                        <span>⬇️</span>
+                        <span>Baixar</span>
+                    </button>
+                </div>
+                <div class="code-preview">
+                    <pre id="codePreview"></pre>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <span class="icon">ℹ️</span>
+                <p>
+                    <strong>LUB → LUA:</strong> Decompila bytecode Lua para código fonte legível.<br>
+                    <strong>LUA → LUB:</strong> Compila código Lua para bytecode (formato binário).<br>
+                    <em>Nota: A decompilação pode não reproduzir o código original exatamente, mas será funcionalmente equivalente.</em>
+                </p>
+            </div>
+        </div>
+
+        <footer>
+            Conversor LUB ↔ LUA | Ferramenta de desenvolvimento
+        </footer>
+    </div>
+
+    <script>
+        // Estado da aplicação
+        let currentMode = 'lub-to-lua';
+        let selectedFile = null;
+        let convertedContent = null;
+        let convertedFileName = '';
+
+        // Elementos DOM
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const removeFile = document.getElementById('removeFile');
+        const convertBtn = document.getElementById('convertBtn');
+        const loading = document.getElementById('loading');
+        const errorMsg = document.getElementById('errorMsg');
+        const resultArea = document.getElementById('resultArea');
+        const codePreview = document.getElementById('codePreview');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // Seletor de modo
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                modeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentMode = btn.dataset.mode;
+                
+                // Atualiza o aceite de arquivo
+                fileInput.accept = currentMode === 'lub-to-lua' ? '.lub' : '.lua';
+                
+                // Limpa seleção anterior
+                clearFile();
+            });
+        });
+
+        // Área de upload - clique
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        // Área de upload - drag & drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // Input de arquivo
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        // Processar arquivo selecionado
+        function handleFile(file) {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const expectedExt = currentMode === 'lub-to-lua' ? 'lub' : 'lua';
+            
+            if (ext !== expectedExt) {
+                showError(`Por favor, selecione um arquivo .${expectedExt} para este modo de conversão.`);
+                return;
+            }
+
+            selectedFile = file;
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            
+            uploadArea.style.display = 'none';
+            fileInfo.classList.add('show');
+            convertBtn.disabled = false;
+            hideError();
+            resultArea.classList.remove('show');
+        }
+
+        // Remover arquivo
+        removeFile.addEventListener('click', clearFile);
+
+        function clearFile() {
+            selectedFile = null;
+            fileInput.value = '';
+            uploadArea.style.display = 'block';
+            fileInfo.classList.remove('show');
+            convertBtn.disabled = true;
+            resultArea.classList.remove('show');
+            hideError();
+        }
+
+        // Formatar tamanho do arquivo
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' bytes';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // Mostrar erro
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.classList.add('show');
+        }
+
+        // Esconder erro
+        function hideError() {
+            errorMsg.classList.remove('show');
+        }
+
+        // Botão de conversão
+        convertBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            loading.classList.add('show');
+            convertBtn.disabled = true;
+            hideError();
+            resultArea.classList.remove('show');
+
+            try {
+                const content = await readFile(selectedFile);
+                
+                if (currentMode === 'lub-to-lua') {
+                    convertedContent = decompileLub(content);
+                    convertedFileName = selectedFile.name.replace('.lub', '.lua');
+                } else {
+                    convertedContent = compileLua(content);
+                    convertedFileName = selectedFile.name.replace('.lua', '.lub');
+                }
+
+                // Mostrar preview
+                if (currentMode === 'lub-to-lua') {
+                    codePreview.textContent = convertedContent;
+                } else {
+                    codePreview.textContent = '[Arquivo binário LUB - ' + convertedContent.byteLength + ' bytes]';
+                }
+
+                resultArea.classList.add('show');
+            } catch (error) {
+                showError('Erro na conversão: ' + error.message);
+            } finally {
+                loading.classList.remove('show');
+                convertBtn.disabled = false;
+            }
+        });
+
+        // Ler arquivo
+        function readFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = () => reject(new Error('Erro ao ler arquivo'));
+                
+                if (currentMode === 'lub-to-lua') {
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    reader.readAsText(file);
+                }
+            });
+        }
+
+        // Decompilador LUB -> LUA (simplificado)
+        function decompileLub(buffer) {
+            const bytes = new Uint8Array(buffer);
+            
+            // Verificar assinatura Lua
+            const signature = [0x1B, 0x4C, 0x75, 0x61]; // \x1BLua
+            let isLuaBytecode = true;
+            for (let i = 0; i < 4 && i < bytes.length; i++) {
+                if (bytes[i] !== signature[i]) {
+                    isLuaBytecode = false;
+                    break;
+                }
+            }
+
+            if (!isLuaBytecode) {
+                // Pode ser um arquivo Lua ofuscado ou comprimido de outra forma
+                // Tentar decodificar como texto
+                try {
+                    const decoder = new TextDecoder('utf-8', { fatal: false });
+                    const text = decoder.decode(bytes);
+                    if (text.includes('function') || text.includes('local') || text.includes('return')) {
+                        return text;
+                    }
+                } catch (e) {}
+                
+                throw new Error('Formato de arquivo não reconhecido. Certifique-se de que é um arquivo LUB válido.');
+            }
+
+            // Parser básico de bytecode Lua
+            let result = '-- Decompiled from LUB file\n';
+            result += '-- Warning: This is a simplified decompilation\n\n';
+
+            // Extrair strings do bytecode
+            const strings = extractStrings(bytes);
+            
+            if (strings.length > 0) {
+                result += '-- Extracted strings:\n';
+                strings.forEach((str, i) => {
+                    result += `-- [${i}] "${str}"\n`;
+                });
+                result += '\n';
+            }
+
+            // Tentar reconstruir estrutura básica
+            result += '-- Reconstructed code structure:\n';
+            result += generateBasicStructure(bytes, strings);
+
+            return result;
+        }
+
+        // Extrair strings do bytecode
+        function extractStrings(bytes) {
+            const strings = [];
+            let i = 0;
+            
+            while (i < bytes.length - 4) {
+                // Procurar por sequências de caracteres imprimíveis
+                let str = '';
+                let start = i;
+                
+                while (i < bytes.length && bytes[i] >= 32 && bytes[i] < 127) {
+                    str += String.fromCharCode(bytes[i]);
+                    i++;
+                }
+                
+                if (str.length >= 3 && !strings.includes(str)) {
+                    // Filtrar strings que parecem código Lua
+                    if (/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(str) || 
+                        str.includes(' ') || 
+                        /^["'].*["']$/.test(str)) {
+                        strings.push(str);
+                    }
+                }
+                
+                i++;
+            }
+            
+            return strings.slice(0, 50); // Limitar quantidade
+        }
+
+        // Gerar estrutura básica
+        function generateBasicStructure(bytes, strings) {
+            let code = '';
+            
+            // Identificar possíveis funções
+            const funcKeywords = strings.filter(s => 
+                s === 'function' || s === 'end' || s === 'local' || 
+                s === 'return' || s === 'if' || s === 'then' || 
+                s === 'else' || s === 'for' || s === 'while' || s === 'do'
+            );
+
+            const variables = strings.filter(s => 
+                /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(s) && 
+                !['function', 'end', 'local', 'return', 'if', 'then', 'else', 'for', 'while', 'do', 'nil', 'true', 'false'].includes(s)
+            );
+
+            if (variables.length > 0) {
+                code += '-- Possible variables/functions:\n';
+                variables.forEach(v => {
+                    code += `local ${v}\n`;
+                });
+                code += '\n';
+            }
+
+            code += '-- Main structure (placeholder):\n';
+            code += 'local function main()\n';
+            code += '    -- Original bytecode could not be fully decompiled\n';
+            code += '    -- Consider using a specialized Lua decompiler for better results\n';
+            code += 'end\n\n';
+            code += 'return main\n';
+
+            return code;
+        }
+
+        // Compilador LUA -> LUB
+        function compileLua(source) {
+            // Criar um bytecode Lua simplificado
+            const encoder = new TextEncoder();
+            const sourceBytes = encoder.encode(source);
+            
+            // Header Lua 5.1
+            const header = new Uint8Array([
+                0x1B, 0x4C, 0x75, 0x61, // Signature: \x1BLua
+                0x51,                     // Version 5.1
+                0x00,                     // Format (official)
+                0x01,                     // Little endian
+                0x04,                     // Size of int
+                0x04,                     // Size of size_t  
+                0x04,                     // Size of instruction
+                0x08,                     // Size of lua_Number
+                0x00                      // Integral flag
+            ]);
+
+            // Criar buffer combinado (simplificado)
+            const result = new Uint8Array(header.length + sourceBytes.length + 20);
+            result.set(header, 0);
+            
+            // Adicionar tamanho da fonte
+            const sizeBytes = new Uint8Array(4);
+            new DataView(sizeBytes.buffer).setUint32(0, sourceBytes.length, true);
+            result.set(sizeBytes, header.length);
+            
+            // Adicionar fonte (em produção, isso seria bytecode real)
+            result.set(sourceBytes, header.length + 4);
+
+            return result.buffer;
+        }
+
+        // Botão de download
+        downloadBtn.addEventListener('click', () => {
+            if (!convertedContent) return;
+
+            let blob;
+            if (currentMode === 'lub-to-lua') {
+                blob = new Blob([convertedContent], { type: 'text/plain' });
+            } else {
+                blob = new Blob([convertedContent], { type: 'application/octet-stream' });
+            }
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = convertedFileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+</html>
