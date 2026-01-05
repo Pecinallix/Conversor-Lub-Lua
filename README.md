@@ -158,7 +158,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 👨‍💻 Autor
 
-Desenvolvido por [Seu Nome](https://github.com/SEU-USUARIO)
+Desenvolvido por [Devicaro](https://github.com/pecinallix)
 
 ## 🙏 Agradecimentos
 
@@ -171,5 +171,5 @@ Desenvolvido por [Seu Nome](https://github.com/SEU-USUARIO)
 <div align="center">
   Feito com ❤️ e ☕
 
-  [⭐ Star no GitHub](https://github.com/SEU-USUARIO/conversor) • [🐛 Reportar Bug](https://github.com/SEU-USUARIO/conversor/issues) • [💡 Solicitar Feature](https://github.com/SEU-USUARIO/conversor/issues)
+  [⭐ Star no GitHub](https://github.com/pecinallix/conversor) • [🐛 Reportar Bug](https://github.com/pecinallix/conversor/issues) • [💡 Solicitar Feature](https://github.com/pecinallix/conversor/issues)
 </div>
